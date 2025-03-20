@@ -1,11 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Güvenli İhbar Sistemi</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+    <div class="container">
+        <h1>Güvenli İhbar Sistemi</h1>
+        <form id="ihbarForm" action="process.php" method="POST">
+            <div class="form-group">
+                <label for="email">e-Posta Adresiniz: *</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="bildirimKaynagi">Bildirim Kaynağı: *</label>
+                <select id="bildirimKaynagi" name="bildirimKaynagi" required>
+                    <option value="Vatandaş" selected>Vatandaş</option>
+                    <option value="Personel">Personel</option>
+                    <option value="Öğrenci">Öğrenci</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Olay Tanımı: *</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="ddos" name="olayTanimi[]" value="Servis Dışı Bırakma Saldırısı">
+                        <label for="ddos">Servis Dışı Bırakma Saldırısı (DDoS)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="dataLeak" name="olayTanimi[]" value="Bilgi Sızdırma">
+                        <label for="dataLeak">Bilgi Sızdırma (Data Leakage)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="malware" name="olayTanimi[]" value="Zararlı Yazılım">
+                        <label for="malware">Zararlı Yazılım (Malware)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="phishing" name="olayTanimi[]" value="Oltalama">
+                        <label for="phishing">Oltalama (Phishing)</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="webDefacement" name="olayTanimi[]" value="Web Sayfası Tahrifatı">
+                        <label for="webDefacement">Web Sayfası Tahrifatı</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="socialEng" name="olayTanimi[]" value="Sosyal Mühendislik">
+                        <label for="socialEng">Sosyal Mühendislik</label>
+                    </div>
+                </div>
+                <div id="olayTanimiError" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="olayAciklamasi">Olay Açıklaması: *</label>
+                <textarea id="olayAciklamasi" name="olayAciklamasi" rows="5" required></textarea>
+                <div id="karakterSayaci">Minimum 30 karakter gerekli (0/30)</div>
+                <div id="olayAciklamasiError" class="error-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Güvenlik Doğrulaması: *</label>
+                <div class="captcha-container">
+                    <span id="captchaQuestion"></span>
+                    <input type="number" id="captchaAnswer" name="captchaAnswer" required>
+                    <input type="hidden" id="captchaExpected" name="captchaExpected">
+                </div>
+                <div id="captchaError" class="error-message"></div>
+            </div>
+
+            <button type="submit" id="submitBtn">İhbarı Gönder</button>
+        </form>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>

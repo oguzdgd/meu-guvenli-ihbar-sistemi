@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,55 +9,71 @@
   <body>
     <div class="container">
       <h1>Güvenli İhbar Sistemi</h1>
-      <form id="ihbarForm">
+      <form id="report-form">
         <div class="form-group">
-          <label for="olayTarihi">Olay Tarihi: *</label>
-          <input type="date" id="olayTarihi" name="olayTarihi" />
+          <label for="incident-date">Olay Tarihi: *</label>
+          <input type="date" id="incident-date" name="incident-date" />
+          <span class="incident-date-detail">(Olay ne zaman gerçekleşti)</span>
         </div>
 
         <div class="form-group">
-          <label>Olay Tanımı: *</label>
-          <div id="olayTanimlariContainer" class="checkbox-group">
-            <!-- Olay tanımları JavaScript ile doldurulacak -->
-          </div>
+          <label>Olay Türü: *</label>
+          <div id="incident-types-container" class="checkbox-group"></div>
         </div>
 
         <div class="form-group">
-          <label for="olayAciklamasi">Olay Açıklaması: *</label>
+          <label for="incident-description">Olay Açıklaması: *</label>
           <textarea
-            id="olayAciklamasi"
-            name="olayAciklamasi"
+            id="incident-description"
+            name="incident-description"
             rows="5"
+            placeholder="En az 50 karakter giriniz "
           ></textarea>
-          <div id="karakterSayaci">Minimum 30 karakter gerekli (0/30)</div>
+          <div id="char-counter">0/50</div>
         </div>
 
         <div class="form-group">
-          <label>Güvenlik Doğrulaması: *</label>
+          <label for="file-input">Ekleme </label>
+          <div id="drop-zone" class="drop-zone">
+            PDF dosyasını buraya sürükleyin veya tıklayın
+          </div>
+          <input
+            type="file"
+            id="file-input"
+
+            accept="application/pdf"
+          />
+          <div id="file-name">Seçilen dosya: Yok</div>
+        </div>
+
+        <div class="form-group">
+          <label for="captcha-expected">Güvenlik Doğrulaması: *</label>
           <div class="captcha-container">
-            <span id="captchaQuestion"></span>
+            <span id="captcha-question"></span>
+            <input type="number" id="captcha-answer" name="captcha-answer" />
             <input
-              type="number"
-              id="captchaAnswer"
-              name="captchaAnswer"
+              type="hidden"
+              id="captcha-expected"
+              name="captcha-expected"
             />
-            <input type="hidden" id="captchaExpected" name="captchaExpected" />
           </div>
         </div>
 
-        <button type="submit" id="submitBtn">İhbarı Gönder</button>
+        <button type="submit" id="submit-button">Submit Report</button>
       </form>
-
-      <!-- Başarılı ihbar için modal -->
-      <div id="successModal" class="modal">
+      <div id="success-modal" class="modal">
         <div class="modal-content">
-          <div class="success-message">İhbarınız Başarıyla Kaydedildi</div>
-          <p>İhbarınız güvenli bir şekilde sistemimize kaydedilmiştir.</p>
-          <button onclick="window.location.reload()">Yeni İhbar Oluştur</button>
+          <div class="success-message">
+            Your Report Has Been Successfully Submitted
+          </div>
+          <p>Your report has been securely recorded in our system.</p>
+          <button onclick="window.location.reload()">
+            Submit a New Report
+          </button>
         </div>
       </div>
     </div>
-    <script src="olay_tanimlari.js"></script>
+    <script src="incident_types.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

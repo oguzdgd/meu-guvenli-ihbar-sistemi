@@ -1,5 +1,5 @@
-const olayTanimlari = {
-    olaylar: [
+const incidentTypes = {
+    incidents: [
         {
             id: "ddos",
             label: "Servis Dışı Bırakma Saldırısı (DDoS)",

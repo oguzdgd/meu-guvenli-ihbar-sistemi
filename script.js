@@ -1,3 +1,5 @@
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('report-form');
     const incidentDate = document.getElementById('incident-date');
@@ -6,16 +8,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const submitButton = document.getElementById('submit-button');
     const captchaQuestion = document.getElementById('captcha-question');
     const captchaAnswer = document.getElementById('captcha-answer');
-    const captchaExpected = document.getElementById('captcha-expected');
+    const captchaError = document.getElementById('captcha-error');
+
     const successModal = document.getElementById('success-modal');
     const incidentTypesContainer = document.getElementById('incident-types-container');
-
-
 
     const dropZone = document.getElementById("drop-zone");
     const fileInput = document.getElementById("file-input");
     const fileNameDisplay = document.getElementById("file-name");
 
+    let captchaExpectedValue;
 
     dropZone.addEventListener("click", function () {
         fileInput.click();
@@ -45,6 +47,10 @@ document.addEventListener('DOMContentLoaded', function () {
             handleFileSelection(e.dataTransfer.files);
         }
     });
+
+    submitButton.addEventListener("click",function(){
+
+    })
 
     function handleFileSelection(files) {
         if (files.length > 0) {
@@ -115,11 +121,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     function generateCaptcha() {
-        const num1 = Math.floor(Math.random() * 20) + 1;
+        const num1 = Math.floor(Math.random() * 10) + 1;
         const num2 = Math.floor(Math.random() * 10) + 1;
-        const expected = num1 + num2;
+        captchaExpectedValue = num1 + num2;
         captchaQuestion.textContent = `${num1} + ${num2} = ?`;
-        captchaExpected.value = expected;
+        captchaAnswer.value = "";
+        console.log("generate", captchaAnswer.value)
+
+        if (captchaError) {
+            captchaError.style.display = "none";
+        }
     }
 
 
@@ -148,8 +159,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
 
-        if (!captchaAnswer.value || parseInt(captchaAnswer.value) !== parseInt(captchaExpected.value)) {
-            showError(captchaAnswer, 'Incorrect answer to the math question.');
+        if (!captchaAnswer.value || parseInt(captchaAnswer.value) !== captchaExpectedValue) {
+            console.log("if", captchaAnswer.value)
+            showError(captchaAnswer, 'Yanlış cevap! Lütfen tekrar deneyin.');
             generateCaptcha();
             captchaAnswer.value = '';
             isValid = false;
@@ -157,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return isValid;
     }
+
 
 
     incidentDescription.addEventListener('input', function () {
@@ -170,6 +183,10 @@ document.addEventListener('DOMContentLoaded', function () {
             charCounter.style.color = '#e74c3c';
         }
     });
+
+
+
+
 
 
     form.addEventListener('submit', function (e) {

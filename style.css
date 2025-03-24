@@ -32,7 +32,9 @@ body {
 }
 
 h1 {
-  text-align: center;
+  display: inline;
+  display: flex;
+  justify-content: center;
   color: var(--primary-color);
   margin-bottom: 2rem;
   font-size: 2rem;
@@ -49,10 +51,9 @@ label {
   color: var(--primary-color);
 }
 
-input[type="email"],
 input[type="date"],
 textarea,
-#captcha-answer {
+.captcha-input {
   width: 100%;
   padding: 0.8rem;
   border: 1px solid #ddd;
@@ -61,7 +62,6 @@ textarea,
   transition: border-color 0.3s ease;
 }
 
-input[type="email"]:focus,
 input[type="date"]:focus,
 textarea:focus {
   outline: none;
@@ -69,18 +69,9 @@ textarea:focus {
 }
 
 input[type="date"],
-#captcha-answer {
+.captcha-input {
   width: 30%;
   padding: 0.5rem;
-}
-
-#captcha-answer {
-  width: 30%;
-  padding: 0.5rem;
-}
-
-#captcha-expected {
-  border: 1px solid brown;
 }
 
 .checkbox-group {

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Güvenli İhbar Sistemi</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -33,42 +34,42 @@
         </div>
 
         <div class="form-group">
-          <label for="file-input">Ekleme </label>
+          <label for="file-input">Dosya Ekle</label>
           <div id="drop-zone" class="drop-zone">
             PDF dosyasını buraya sürükleyin veya tıklayın
           </div>
-          <input
-            type="file"
-            id="file-input"
-
-            accept="application/pdf"
-          />
+          <input type="file" id="file-input" accept="application/pdf" />
           <div id="file-name">Seçilen dosya: Yok</div>
         </div>
 
         <div class="form-group">
-          <label for="captcha-expected">Güvenlik Doğrulaması: *</label>
+          <label for="captcha-answer">Güvenlik Doğrulaması: *</label>
           <div class="captcha-container">
             <span id="captcha-question"></span>
-            <input type="number" id="captcha-answer" name="captcha-answer" />
             <input
-              type="hidden"
-              id="captcha-expected"
-              name="captcha-expected"
+              type="number"
+              class="captcha-input"
+              id="captcha-answer"
+              name="captcha-answer"
             />
+            <span
+              id="captcha-error"
+              class="error-message"
+              style="display: none"
+            ></span>
           </div>
         </div>
 
-        <button type="submit" id="submit-button">Submit Report</button>
+        <button type="submit" id="submit-button">Gönder</button>
       </form>
       <div id="success-modal" class="modal">
         <div class="modal-content">
-          <div class="success-message">
-            Your Report Has Been Successfully Submitted
-          </div>
-          <p>Your report has been securely recorded in our system.</p>
+          <div class="success-message">İhbarın başarılı şekilde gönderildi</div>
+          <p>
+            Raporunuz sistemimizde güvenli bir şekilde kayıt altına alınmıştır.
+          </p>
           <button onclick="window.location.reload()">
-            Submit a New Report
+            Yeni Bir Rapor Gönder
           </button>
         </div>
       </div>

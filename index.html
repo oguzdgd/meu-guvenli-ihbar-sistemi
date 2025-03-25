@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Güvenli İhbar Sistemi</title>
     <link rel="stylesheet" href="style.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://unpkg.com/@pdf-lib/fontkit@0.0.4/dist/fontkit.umd.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -36,10 +37,17 @@
         <div class="form-group">
           <label for="file-input">Dosya Ekle</label>
           <div id="drop-zone" class="drop-zone">
-            PDF dosyasını buraya sürükleyin veya tıklayın
+            <p>PDF dosyasını buraya sürükleyin veya tıklayın.</p>
+            <p>En fazla 3 dosya yükleyebilirsiniz.</p>
+            <p>Dosya boyutu 10MB'ı aşmamalıdır.</p>
           </div>
-          <input type="file" id="file-input" accept="application/pdf" />
-          <div id="file-name">Seçilen dosya: Yok</div>
+          <input
+            type="file"
+            id="file-input"
+            accept="application/pdf,image/*"
+            multiple
+          />
+          <div id="file-list">Seçilen dosya: Yok</div>
         </div>
 
         <div class="form-group">

@@ -1,6 +1,5 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-
 document.addEventListener('DOMContentLoaded', function () {
+
     const form = document.getElementById('report-form');
     const incidentDate = document.getElementById('incident-date');
     const incidentDescription = document.getElementById('incident-description');
@@ -9,116 +8,155 @@ document.addEventListener('DOMContentLoaded', function () {
     const captchaQuestion = document.getElementById('captcha-question');
     const captchaAnswer = document.getElementById('captcha-answer');
     const captchaError = document.getElementById('captcha-error');
-
     const successModal = document.getElementById('success-modal');
     const incidentTypesContainer = document.getElementById('incident-types-container');
-
     const dropZone = document.getElementById("drop-zone");
     const fileInput = document.getElementById("file-input");
-    const fileNameDisplay = document.getElementById("file-name");
+    const fileList = document.getElementById('file-list');
 
     let captchaExpectedValue;
+
 
     dropZone.addEventListener("click", function () {
         fileInput.click();
     });
-
-
-    fileInput.addEventListener("change", function () {
-        handleFileSelection(fileInput.files);
-    });
-
-
     dropZone.addEventListener("dragover", function (e) {
         e.preventDefault();
         dropZone.classList.add("dragover");
     });
-
     dropZone.addEventListener("dragleave", function () {
         dropZone.classList.remove("dragover");
     });
-
     dropZone.addEventListener("drop", function (e) {
         e.preventDefault();
         dropZone.classList.remove("dragover");
-
         if (e.dataTransfer.files.length > 0) {
             fileInput.files = e.dataTransfer.files;
             handleFileSelection(e.dataTransfer.files);
         }
     });
+    fileInput.addEventListener("change", function () {
+        handleFileSelection(fileInput.files);
+    });
 
-    submitButton.addEventListener("click",function(){
 
-    })
+    window.selectedFiles = [];
+
 
     function handleFileSelection(files) {
-        if (files.length > 0) {
-            const file = files[0];
-            if (file.type === "application/pdf") {
-                fileNameDisplay.textContent = `Seçilen dosya: ${file.name}`;
+        const maxFiles = 3;
+        const maxSize = 10 * 1024 * 1024; 
+        const validFiles = [...window.selectedFiles]; 
 
-            } else {
-                fileNameDisplay.textContent = "Seçilen dosya: Yok";
-                alert("Hata! Lütfen yalnızca PDF dosyası seçin.");
+        if (validFiles.length + files.length > maxFiles) {
+            alert(`En fazla ${maxFiles} dosya seçebilirsiniz.`);
+            return;
+        }
+
+        for (const file of files) {
+            if (file.size > maxSize) {
+                alert(`Yüklenen dosya boyutu 10 MB'dan büyük olamaz.`);
+                continue;
             }
+
+
+            if (!validFiles.some(existingFile => existingFile.name === file.name)) {
+                validFiles.push(file);
+            }
+        }
+
+        window.selectedFiles = validFiles;
+        updateFileListDisplay();
+    }
+
+
+    function updateFileListDisplay() {
+
+        fileList.innerHTML = ''; 
+
+        if (window.selectedFiles && window.selectedFiles.length > 0) {
+            window.selectedFiles.forEach((file, index) => {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'file-item';
+                fileDiv.style.display = 'flex';
+                fileDiv.style.alignItems = 'center';
+                fileDiv.style.justifyContent = 'space-between';
+                fileDiv.style.marginBottom = '5px';
+
+                const fileNameSpan = document.createElement('span');
+                fileNameSpan.textContent = file.name;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '✖';
+                removeBtn.style.width = '20px';
+                removeBtn.style.height = '20px';
+                removeBtn.style.padding = '0';
+                removeBtn.style.fontSize = '12px';
+                removeBtn.style.cursor = 'pointer';
+                removeBtn.addEventListener('click', function () {
+                    removeFile(index);
+                });
+
+                fileDiv.appendChild(fileNameSpan);
+                fileDiv.appendChild(removeBtn);
+                fileList.appendChild(fileDiv);
+
+               
+                if (index < window.selectedFiles.length - 1) {
+                    const br = document.createElement('br');
+                    fileList.appendChild(br);
+                }
+            });
         } else {
-            fileNameDisplay.textContent = "Seçilen dosya: Yok";
+            fileList.textContent = 'Seçilen dosya: Yok';
         }
     }
 
+    function removeFile(index) {
+        window.selectedFiles.splice(index, 1);
+        updateFileListDisplay();
+    }
 
     function showError(element, message) {
         const formGroup = element.closest('.form-group');
         let errorDiv = formGroup.querySelector('.error-message');
-
         if (!errorDiv) {
             errorDiv = document.createElement('div');
             errorDiv.className = 'error-message';
             formGroup.appendChild(errorDiv);
         }
-
         errorDiv.textContent = message;
         element.focus();
     }
 
-
     function removeError(element) {
         const formGroup = element.closest('.form-group');
         const errorDiv = formGroup.querySelector('.error-message');
-        if (errorDiv) {
-            errorDiv.remove();
-        }
+        if (errorDiv) errorDiv.remove();
     }
-
 
     function clearAllErrors() {
         document.querySelectorAll('.error-message').forEach(error => error.remove());
     }
-
 
     function loadIncidentTypes() {
         incidentTypesContainer.innerHTML = '';
         incidentTypes.incidents.forEach(incident => {
             const checkboxItem = document.createElement('div');
             checkboxItem.className = 'checkbox-item';
-
             const input = document.createElement('input');
             input.type = 'checkbox';
             input.id = incident.id;
             input.name = 'incident-type[]';
             input.value = incident.value;
-
             const label = document.createElement('label');
             label.htmlFor = incident.id;
             label.textContent = incident.label;
-
             checkboxItem.appendChild(input);
             checkboxItem.appendChild(label);
             incidentTypesContainer.appendChild(checkboxItem);
         });
     }
-
 
     function generateCaptcha() {
         const num1 = Math.floor(Math.random() * 10) + 1;
@@ -126,51 +164,36 @@ document.addEventListener('DOMContentLoaded', function () {
         captchaExpectedValue = num1 + num2;
         captchaQuestion.textContent = `${num1} + ${num2} = ?`;
         captchaAnswer.value = "";
-        console.log("generate", captchaAnswer.value)
-
         if (captchaError) {
             captchaError.style.display = "none";
         }
     }
 
-
     function validateForm() {
         clearAllErrors();
         let isValid = true;
-
-
         if (!incidentDate.value) {
             showError(incidentDate, 'Please select the incident date.');
             isValid = false;
         }
-
-
         const incidentTypeCheckboxes = document.querySelectorAll('input[name="incident-type[]"]:checked');
         if (incidentTypeCheckboxes.length === 0) {
             const firstCheckbox = incidentTypesContainer.querySelector('input[type="checkbox"]');
             showError(firstCheckbox, 'Please select at least one incident type.');
             isValid = false;
         }
-
-
         if (!incidentDescription.value || incidentDescription.value.length < 30) {
             showError(incidentDescription, 'Please enter at least 30 characters.');
             isValid = false;
         }
-
-
         if (!captchaAnswer.value || parseInt(captchaAnswer.value) !== captchaExpectedValue) {
-            console.log("if", captchaAnswer.value)
             showError(captchaAnswer, 'Yanlış cevap! Lütfen tekrar deneyin.');
             generateCaptcha();
             captchaAnswer.value = '';
             isValid = false;
         }
-
         return isValid;
     }
-
-
 
     incidentDescription.addEventListener('input', function () {
         const length = this.value.length;
@@ -185,17 +208,69 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
+    async function createPDF(formData, files) {
+        const { PDFDocument, rgb } = PDFLib;
+        const fontkit = window.fontkit;
+        const pdfDoc = await PDFDocument.create();
+        pdfDoc.registerFontkit(fontkit);
+        const page = pdfDoc.addPage([600, 400]);
+        const { width, height } = page.getSize();
 
 
+        const fontBytes = await fetch('fonts/Roboto_Condensed-Regular.ttf').then(res => res.arrayBuffer());
+        const customFont = await pdfDoc.embedFont(fontBytes);
+
+        page.drawText(`Olay Tarihi: ${formData.incidentDate}`, { x: 50, y: height - 50, size: 12, font: customFont, color: rgb(0, 0, 0) });
+        page.drawText(`Olay Türleri: ${formData.incidentTypes.join(', ')}`, { x: 50, y: height - 70, size: 12, font: customFont, color: rgb(0, 0, 0) });
+        page.drawText(`Olay Açıklaması: ${formData.incidentDescription}`, {
+            x: 50,
+            y: height - 90,
+            size: 12,
+            font: customFont,
+            color: rgb(0, 0, 0),
+            maxWidth: 500,
+            lineHeight: 14
+        });
 
 
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
+        if (files && files.length > 0) {
+            for (const file of files) {
+                if (file.type === "application/pdf") {
+                    const fileBytes = await file.arrayBuffer();
+                    const extPdf = await PDFDocument.load(fileBytes);
+                    const copiedPages = await pdfDoc.copyPages(extPdf, extPdf.getPageIndices());
+                    copiedPages.forEach(p => pdfDoc.addPage(p));
+                } else if (file.type.startsWith("image/")) {
+                    const imgBytes = await file.arrayBuffer();
+                    let image;
+                    if (file.type === "image/jpeg") {
+                        image = await pdfDoc.embedJpg(imgBytes);
+                    } else if (file.type === "image/png") {
+                        image = await pdfDoc.embedPng(imgBytes);
+                    } else {
+                        alert(`${file.name} formatı desteklenmiyor.`);
+                        continue;
+                    }
 
-        if (!validateForm()) {
-            return;
+                    const imgPage = pdfDoc.addPage();
+                    const { width: imgPageWidth, height: imgPageHeight } = imgPage.getSize();
+                    const imgDims = image.scale(0.5);
+                    const x = (imgPageWidth - imgDims.width) / 2;
+                    const y = (imgPageHeight - imgDims.height) / 2;
+                    imgPage.drawImage(image, { x, y, width: imgDims.width, height: imgDims.height });
+                } else {
+                    alert(`${file.name} dosya tipi desteklenmiyor.`);
+                }
+            }
         }
 
+        const mergedPdfBytes = await pdfDoc.save();
+        return mergedPdfBytes;
+    }
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!validateForm()) return;
 
         const incidentTypeCheckboxes = document.querySelectorAll('input[name="incident-type[]"]:checked');
         const formData = {
@@ -205,15 +280,19 @@ document.addEventListener('DOMContentLoaded', function () {
             incidentDescription: incidentDescription.value
         };
 
+        const files = window.selectedFiles || [];
+        const pdfBytes = await createPDF(formData, files);
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'ihbar_raporu.pdf';
+        link.click();
 
         const reports = JSON.parse(localStorage.getItem('reports') || '[]');
         reports.push(formData);
         localStorage.setItem('reports', JSON.stringify(reports));
-
-
         successModal.style.display = 'block';
     });
-
 
     loadIncidentTypes();
     generateCaptcha();

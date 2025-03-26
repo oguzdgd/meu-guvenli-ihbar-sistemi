@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function handleFileSelection(files) {
         const maxFiles = 3;
-        const maxSize = 10 * 1024 * 1024; 
-        const validFiles = [...window.selectedFiles]; 
+        const maxSize = 10 * 1024 * 1024;
+        const validFiles = [...window.selectedFiles];
 
         if (validFiles.length + files.length > maxFiles) {
             alert(`En fazla ${maxFiles} dosya seçebilirsiniz.`);
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateFileListDisplay() {
 
-        fileList.innerHTML = ''; 
+        fileList.innerHTML = '';
 
         if (window.selectedFiles && window.selectedFiles.length > 0) {
             window.selectedFiles.forEach((file, index) => {
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fileDiv.appendChild(removeBtn);
                 fileList.appendChild(fileDiv);
 
-               
+
                 if (index < window.selectedFiles.length - 1) {
                     const br = document.createElement('br');
                     fileList.appendChild(br);
@@ -173,17 +173,17 @@ document.addEventListener('DOMContentLoaded', function () {
         clearAllErrors();
         let isValid = true;
         if (!incidentDate.value) {
-            showError(incidentDate, 'Please select the incident date.');
+            showError(incidentDate, 'Lütfen olay tarihini giriniz.');
             isValid = false;
         }
         const incidentTypeCheckboxes = document.querySelectorAll('input[name="incident-type[]"]:checked');
         if (incidentTypeCheckboxes.length === 0) {
             const firstCheckbox = incidentTypesContainer.querySelector('input[type="checkbox"]');
-            showError(firstCheckbox, 'Please select at least one incident type.');
+            showError(firstCheckbox, 'Lütfen en az bir ihbar türü seçiniz');
             isValid = false;
         }
         if (!incidentDescription.value || incidentDescription.value.length < 30) {
-            showError(incidentDescription, 'Please enter at least 30 characters.');
+            showError(incidentDescription, 'Lütfen en az 30 karakter giriniz.');
             isValid = false;
         }
         if (!captchaAnswer.value || parseInt(captchaAnswer.value) !== captchaExpectedValue) {
@@ -280,18 +280,31 @@ document.addEventListener('DOMContentLoaded', function () {
             incidentDescription: incidentDescription.value
         };
 
-        const files = window.selectedFiles || [];
-        const pdfBytes = await createPDF(formData, files);
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'ihbar_raporu.pdf';
-        link.click();
+       
+        const pdfBytes = await createPDF(formData); 
+        const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
 
-        const reports = JSON.parse(localStorage.getItem('reports') || '[]');
-        reports.push(formData);
-        localStorage.setItem('reports', JSON.stringify(reports));
-        successModal.style.display = 'block';
+        
+        const formDataToSend = new FormData();
+        formDataToSend.append('pdf', pdfBlob, 'ihbar_raporu.pdf'); 
+        formDataToSend.append('formData', JSON.stringify(formData));
+
+        try {
+            const response = await fetch('send_report.php', {
+                method: 'POST',
+                body: formDataToSend
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Rapor başarıyla gönderildi!');
+            } else {
+                alert('Rapor gönderme sırasında bir hata oluştu.');
+            }
+        } catch (error) {
+            console.error('Hata Detayı:', error);
+            alert('Rapor gönderme sırasında bir hata oluştu: ' + error.message);
+        }
     });
 
     loadIncidentTypes();

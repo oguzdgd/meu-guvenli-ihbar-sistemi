@@ -15,8 +15,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const fileList = document.getElementById('file-list');
     const modalButton = document.getElementById('modal-button')
     const loadingOverlay = document.getElementById('loading-overlay');
+    let eventDateInput = document.getElementById("incident-date");
 
     let captchaExpectedValue;
+
+
+    let today = new Date().toISOString().split("T")[0];
+    eventDateInput.setAttribute("max", today);
+
+    eventDateInput.addEventListener("change", function () {
+        let selectedDate = new Date(this.value);
+        let todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+
+        if (selectedDate > todayDate) {
+            alert("Gelecek tarihler seçilemez! Lütfen bugünün tarihine kadar bir tarih girin.");
+            this.value = "";
+        }
+    });
 
 
     dropZone.addEventListener("click", function () {

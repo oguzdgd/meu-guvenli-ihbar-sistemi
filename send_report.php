@@ -1,4 +1,5 @@
 <?php
+session_start();
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -9,15 +10,50 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 require 'vendor/autoload.php';
 
-function sendResponse($success, $message) {
-    echo json_encode(['success' => $success, 'message' => $message]);
-    exit;
+
+// CSRF token oluşturma
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token_time'] = time(); 
+}
+
+
+setcookie('csrf_token', $_SESSION['csrf_token'], [
+    'expires' => time() + 1200, // 1 saat 3600 idi
+    'path' => '/',
+    'domain' => '', // alan adı
+    'secure' => true, // HTTPS kullanılıyorsa true yap
+    'httponly' => true, // JavaScript'ten erişimi engeller
+    'samesite' => 'Strict' // veya 'Lax'
+]);
+
+
+function validateCsrfToken($token) {
+    $isValid = isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+    $isExpired = (time() - $_SESSION['csrf_token_time']) > 3600; // 1 saat süresi
+
+    if ($isExpired) {
+
+        unset($_SESSION['csrf_token']);
+        unset($_SESSION['csrf_token_time']);
+        return false;
+    }
+
+    return $isValid;
 }
 
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    if (!validateCsrfToken($_POST['csrf_token'])) {
+        sendResponse(false, 'Geçersiz CSRF token!');
+    }
     http_response_code(405);
     sendResponse(false, 'Method Not Allowed');
+}
+
+function sendResponse($success, $message) {
+    echo json_encode(['success' => $success, 'message' => $message]);
+    exit;
 }
 
 
@@ -48,20 +84,17 @@ try {
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
     $mail->Username = 'oguzhn.dgd@gmail.com';
-    $mail->Password = '******************'; 
+    $mail->Password = 'nsty nrln lpfa wzze'; 
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
 
-    $mail->setFrom('oguzhn.dgd@gmail.com', 'Güvenli İhbar Sistemi');
+    $mail->setFrom('oguzhn.dgd@gmail.com', 'Guvenli Ihbar Sistemi');
     $mail->addAddress('oguzhn.dgd@gmail.com'); 
-
- 
     $mail->addAttachment($pdfTmpPath, $pdfName);
-
-
     $mail->isHTML(true);
-    $mail->Subject = 'Yeni İhbar Raporu - ' . date('Y-m-d H:i:s');
+
+    $mail->Subject = 'Yeni Ihbar Raporu - ' . date('Y-m-d H:i:s');
     $mailBody = "
     <h2>📋 Yeni İhbar Raporu Detayları</h2>
     <hr>

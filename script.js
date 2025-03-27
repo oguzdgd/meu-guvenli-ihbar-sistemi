@@ -10,9 +10,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const captchaError = document.getElementById('captcha-error');
     const successModal = document.getElementById('success-modal');
     const incidentTypesContainer = document.getElementById('incident-types-container');
-    const dropZone = document.getElementById("drop-zone");
-    const fileInput = document.getElementById("file-input");
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
     const fileList = document.getElementById('file-list');
+    const modalButton = document.getElementById('modal-button')
+    const loadingOverlay = document.getElementById('loading-overlay');
 
     let captchaExpectedValue;
 
@@ -39,14 +41,18 @@ document.addEventListener('DOMContentLoaded', function () {
         handleFileSelection(fileInput.files);
     });
 
+    modalButton.addEventListener("click", function () {
+        window.location.reload();
+    })
 
-    window.selectedFiles = [];
+
+    let selectedFiles = [];
 
 
     function handleFileSelection(files) {
         const maxFiles = 3;
         const maxSize = 10 * 1024 * 1024;
-        const validFiles = [...window.selectedFiles];
+        const validFiles = [...selectedFiles];
 
         if (validFiles.length + files.length > maxFiles) {
             alert(`En fazla ${maxFiles} dosya seçebilirsiniz.`);
@@ -65,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        window.selectedFiles = validFiles;
+        selectedFiles = validFiles;
         updateFileListDisplay();
     }
 
@@ -74,8 +80,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         fileList.innerHTML = '';
 
-        if (window.selectedFiles && window.selectedFiles.length > 0) {
-            window.selectedFiles.forEach((file, index) => {
+        if (selectedFiles && selectedFiles.length > 0) {
+            selectedFiles.forEach((file, index) => {
                 const fileDiv = document.createElement('div');
                 fileDiv.className = 'file-item';
                 fileDiv.style.display = 'flex';
@@ -102,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fileList.appendChild(fileDiv);
 
 
-                if (index < window.selectedFiles.length - 1) {
+                if (index < selectedFiles.length - 1) {
                     const br = document.createElement('br');
                     fileList.appendChild(br);
                 }
@@ -113,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function removeFile(index) {
-        window.selectedFiles.splice(index, 1);
+        selectedFiles.splice(index, 1);
         updateFileListDisplay();
     }
 
@@ -183,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
             isValid = false;
         }
         if (!incidentDescription.value || incidentDescription.value.length < 30) {
-            showError(incidentDescription, 'Lütfen en az 30 karakter giriniz.');
+            showError(incidentDescription, 'Lütfen en az 50 karakter giriniz.');
             isValid = false;
         }
         if (!captchaAnswer.value || parseInt(captchaAnswer.value) !== captchaExpectedValue) {
@@ -270,7 +276,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
-        if (!validateForm()) return;
+
+        loadingOverlay.style.display = 'flex';
+
+        if (!validateForm()) {
+
+            loadingOverlay.style.display = 'none';
+            generateCaptcha()
+
+            return;
+        }
+
+        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
 
         const incidentTypeCheckboxes = document.querySelectorAll('input[name="incident-type[]"]:checked');
         const formData = {
@@ -280,14 +297,18 @@ document.addEventListener('DOMContentLoaded', function () {
             incidentDescription: incidentDescription.value
         };
 
-       
-        const pdfBytes = await createPDF(formData); 
+
+        const pdfBytes = await createPDF(formData, selectedFiles);
+        console.log(selectedFiles);
+
         const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
 
-        
+
         const formDataToSend = new FormData();
-        formDataToSend.append('pdf', pdfBlob, 'ihbar_raporu.pdf'); 
+        formDataToSend.append('csrf_token', csrfToken);
+        formDataToSend.append('pdf', pdfBlob, 'ihbar_raporu.pdf');
         formDataToSend.append('formData', JSON.stringify(formData));
+
 
         try {
             const response = await fetch('send_report.php', {
@@ -297,13 +318,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const result = await response.json();
             if (result.success) {
-                alert('Rapor başarıyla gönderildi!');
+                successModal.style.display = 'block';
             } else {
                 alert('Rapor gönderme sırasında bir hata oluştu.');
             }
         } catch (error) {
             console.error('Hata Detayı:', error);
             alert('Rapor gönderme sırasında bir hata oluştu: ' + error.message);
+        }
+        finally {
+            loadingOverlay.style.display = 'none';
         }
     });
 

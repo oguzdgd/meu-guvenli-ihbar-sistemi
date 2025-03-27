@@ -11,7 +11,17 @@
   <body>
     <div class="container">
       <h1>Güvenli İhbar Sistemi</h1>
+
+      <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Lütfen bekleyin...</div>
+      </div>
       <form id="report-form">
+        <input
+          type="hidden"
+          name="csrf_token"
+          value="<?php echo $_SESSION['csrf_token']; ?>"
+        />
         <div class="form-group">
           <label for="incident-date">Olay Tarihi: *</label>
           <input type="date" id="incident-date" name="incident-date" />
@@ -76,9 +86,7 @@
           <p>
             Raporunuz sistemimizde güvenli bir şekilde kayıt altına alınmıştır.
           </p>
-          <button onclick="window.location.reload()">
-            Yeni Bir Rapor Gönder
-          </button>
+          <button id="modal-button">Yeni Bir Rapor Gönder</button>
         </div>
       </div>
     </div>

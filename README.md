@@ -120,6 +120,11 @@ pdf-lib link: https://www.npmjs.com/package/pdf-lib
 
 ---
 
+## Video
+
+https://github.com/user-attachments/assets/17750b47-4421-433d-a7ea-cc9d1fffe513
+
+
 ## 📝 Usage
 
 1. Select the date
